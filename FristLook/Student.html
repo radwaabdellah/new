@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8" />
+    <link href="Content/bootstrap.css" rel="stylesheet" />
+    <link href="Content/toastr.css" rel="stylesheet" />
+</head>
+<body class="container">
+    <h1>Student Mangement</h1>
+    <div>
+        <input type="text" id="id" placeholder="enter id" />
+        <input type="text" id="name" value="" placeholder="enter name" />
+        <input type="button" value="add" onclick="addStudent();" />
+    </div>
+    <br />
+    <table class="table table-bordered table-hover table-striped">
+        <thead>
+            <tr>
+                <td style="width: 50px;">Id</td>
+                <td>Name</td>
+                <td style="width: 1px;">Update</td>
+                <td style="width: 1px;">Delete</td>
+            </tr>
+        </thead>
+        <tbody id="studentTbody"></tbody>
+    </table>
+
+    <script src="Scripts/jquery-1.10.2.js"></script>
+    <script src="Scripts/toastr.js"></script>
+    <script type="text/javascript">
+        function loadList() {
+            $.ajax({
+                url: '/Student/GetAll',
+                method: 'GET'
+            }).done(function (data) {
+                var str = '';
+                for (var i = 0; i < data.length; i++) {
+                    //str += '<tr id="student-' + data[i].Id + '">'
+                    //    + '<td>' + data[i].Id + '</td>'
+                    //    + '<td>' + data[i].Name + '</td>'
+                    //    + '<td><input type="button" value="Delete" onclick="deleteStudent(' + data[i].Id + ');" /></td>'
+                    //    + '</tr>';
+                    str += '<tr id="student-' + data[i].Id + '">'
+                        + '<td><input class="form-control" type="text" value="' + data[i].Id + '" name="Id" /></td>'
+                        + '<td><input class="form-control" type="text" value="' + data[i].Name + '" name="Name" /></td>'
+                        + '<td><input type="button" value="Update" onclick="updateStudent(' + data[i].Id + ');" /></td>'
+                        + '<td><input type="button" value="Delete" onclick="deleteStudent(' + data[i].Id + ');" /></td>'
+                        + '</tr>';
+                }
+                $('#studentTbody').html(str);
+            }).fail(function () {
+                toastr.error('Sorry something went wrong :(');
+            });
+        }
+
+        function deleteStudent(id) {
+            $.ajax({
+                url: '/Student/Remvoe/' + id,
+                method: 'DELETE'
+            }).done(function () {
+                toastr.success('Deleted :)');
+                loadList();
+            }).fail(function () {
+                toastr.error('Sorry something went wrong :(');
+            });
+        }
+
+        function addStudent() {
+            var student = { Id: $('#id').val(), Name: $('#name').val() };
+            $.ajax({
+                url: '/Student/Add',
+                method: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(student)
+            }).done(function () {
+                toastr.success('Added :)');
+                loadList();
+            }).fail(function () {
+                toastr.error('Sorry something went wrong :(');
+            });
+        }
+
+        function updateStudent(id) {           
+            var student = {
+                Id: $('#student-' + id).find('[name="Id"]').val(),
+                Name: $('#student-' + id).find('[name="Name"]').val()
+            };
+            $.ajax({
+                url: '/Student/Modify',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(student)
+            }).done(function () {
+                toastr.success('Updated :)');
+                //loadList();
+            }).fail(function () {
+                toastr.error('Sorry something went wrong :(');
+            });
+        }
+
+        loadList();
+    </script>
+</body>
+</html>
